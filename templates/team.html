@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ team }} - Liquipedia</title>
+</head>
+<body>
+    <h1>Équipe : {{ team.replace("_", " ") }}</h1>
+
+    {% if players %}
+        <h2>Joueurs</h2>
+        <table border="1">
+            <tr>
+                <th>Nom</th>
+                <th>Pays</th>
+                <th>Rôle</th>
+            </tr>
+            {% for player in players %}
+            <tr>
+                <td>{{ player.name }}</td>
+                <td>{{ player.country }}</td>
+                <td>{{ player.role }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h2>Statistiques</h2>
+        <ul>
+            <li>Nombre de joueurs : {{ stats.total_players }}</li>
+            <li>Pays représentés : {{ stats.countries | join(", ") }}</li>
+            <li>Longueur moyenne des pseudos : {{ stats.avg_name_length }}</li>
+        </ul>
+    {% else %}
+        <p>Aucun joueur trouvé ou équipe inconnue.</p>
+    {% endif %}
+
+    <a href="/">← Retour</a>
+</body>
+</html>

@@ -5,9 +5,35 @@
 </head>
 <body>
     <h1>Rechercher une équipe e-sport</h1>
+
+    <!-- 🔍 Recherche individuelle -->
     <form action="/team" method="get">
         <input type="text" name="name" placeholder="Ex: Team_Liquid" required>
         <button type="submit">Chercher</button>
+    </form>
+
+    <hr>
+
+    <!-- ⚔️ Comparaison de deux équipes -->
+    <h2>Comparer deux équipes</h2>
+    <form action="/compare" method="get">
+        <label for="team1">Équipe 1 :</label>
+        <select name="team1" required>
+            <option value="" disabled selected>Choisir une équipe</option>
+            {% for name in team_names %}
+                <option value="{{ name }}">{{ name.replace("_", " ") }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="team2">Équipe 2 :</label>
+        <select name="team2" required>
+            <option value="" disabled selected>Choisir une équipe</option>
+            {% for name in team_names %}
+                <option value="{{ name }}">{{ name.replace("_", " ") }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Comparer</button>
     </form>
 </body>
 </html>

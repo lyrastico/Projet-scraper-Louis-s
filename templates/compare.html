@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Comparaison : {{ team1 }} vs {{ team2 }}</title>
+</head>
+<body>
+    <h1>Comparaison entre {{ team1.replace("_", " ") }} et {{ team2.replace("_", " ") }}</h1>
+
+    <h2>Statistiques générales</h2>
+    <table border="1">
+        <tr>
+            <th>Équipe</th>
+            <th>Nombre de joueurs</th>
+            <th>Pays représentés</th>
+            <th>Longueur moyenne des pseudos</th>
+        </tr>
+        <tr>
+            <td>{{ team1 }}</td>
+            <td>{{ stats1.total_players }}</td>
+            <td>{{ stats1.countries | join(", ") }}</td>
+            <td>{{ stats1.avg_name_length }}</td>
+        </tr>
+        <tr>
+            <td>{{ team2 }}</td>
+            <td>{{ stats2.total_players }}</td>
+            <td>{{ stats2.countries | join(", ") }}</td>
+            <td>{{ stats2.avg_name_length }}</td>
+        </tr>
+    </table>
+
+    <h2>Informations supplémentaires</h2>
+    <table border="1">
+        <tr>
+            <th>Équipe</th>
+            <th>Localisation</th>
+            <th>Région</th>
+            <th>Coachs</th>
+            <th>Winnings</th>
+            <th>Date de création</th>
+        </tr>
+        <tr>
+            <td>{{ team1 }}</td>
+            <td>{{ info1.location or 'Inconnue' }}</td>
+            <td>{{ info1.region or 'Inconnue' }}</td>
+            <td>{{ info1.coachs | join(", ") if info1.coachs else 'Inconnu' }}</td>
+            <td>{{ info1.winnings or 'Inconnus' }}</td>
+            <td>{{ info1.created or 'Inconnue' }}</td>
+        </tr>
+        <tr>
+            <td>{{ team2 }}</td>
+            <td>{{ info2.location or 'Inconnue' }}</td>
+            <td>{{ info2.region or 'Inconnue' }}</td>
+            <td>{{ info2.coachs | join(", ") if info2.coachs else 'Inconnu' }}</td>
+            <td>{{ info2.winnings or 'Inconnus' }}</td>
+            <td>{{ info2.created or 'Inconnue' }}</td>
+        </tr>
+    </table>
+
+    <a href="/">← Retour à l'accueil</a>
+</body>
+</html>

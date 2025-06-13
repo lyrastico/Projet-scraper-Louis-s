@@ -29,6 +29,32 @@
             <li>Pays représentés : {{ stats.countries | join(", ") }}</li>
             <li>Longueur moyenne des pseudos : {{ stats.avg_name_length }}</li>
         </ul>
+
+        <h2>Informations générales</h2>
+        <ul>
+            <li><strong>Localisation :</strong> {{ info.location or "Inconnue" }}</li>
+            <li><strong>Région :</strong> {{ info.region or "Inconnue" }}</li>
+            <li><strong>Coach(s) :</strong>
+                {% if info.coachs %}
+                    {{ info.coachs | join(", ") }}
+                {% else %}
+                    Inconnu
+                {% endif %}
+            </li>
+            <li><strong>Winnings :</strong> {{ info.winnings or "Inconnus" }}</li>
+            <li><strong>Date de création :</strong> {{ info.created or "Inconnue" }}</li>
+        </ul>
+
+        <h2>Liens</h2>
+        {% if info.socials %}
+            <ul>
+                {% for link in info.socials %}
+                    <li><a href="{{ link }}" target="_blank">{{ link }}</a></li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Aucun lien disponible.</p>
+        {% endif %}
     {% else %}
         <p>Aucun joueur trouvé ou équipe inconnue.</p>
     {% endif %}

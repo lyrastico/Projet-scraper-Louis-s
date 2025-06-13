@@ -1,99 +1,61 @@
 import requests
 from bs4 import BeautifulSoup
-from mongo_client import get_mongo_collection
+from .mongo_client import get_mongo_collection
 
 def get_match_info(match_html):
-    """
-    Récupère les informations d'un seul match depuis l'HTML fourni
-    :param match_html: HTML du match à analyser
-    :return: Dictionnaire avec les équipes et leurs scores
-    """
-    team_entries = match_html.find_all('div', class_='brkts-opponent-entry')
-    
-    teams = []
-    scores = []
-    
-    for entry in team_entries:
-        team_name_element = entry.find('span', class_='name')
-        if not team_name_element:
-            team_name_element = entry.find('span', {'class': 'visible-xs'})
-            
-        team_name = team_name_element.text.strip()
-        
-        score_element = entry.find('div', class_='brkts-opponent-score-inner')
-        score = int(score_element.text) if score_element else 0
-        
-        teams.append(team_name)
+    entries = match_html.find_all('div', class_='brkts-opponent-entry')
+    teams, scores = [], []
+    for e in entries:
+        name_el = e.find('span', class_='name') or e.find('span', class_='visible-xs')
+        team = name_el.text.strip() if name_el else "Inconnu"
+        score_el = e.find('div', class_='brkts-opponent-score-inner')
+        score = int(score_el.text.strip()) if score_el and score_el.text.strip().isdigit() else 0
+        teams.append(team)
         scores.append(score)
-    
-    return {
-        'team1': teams[0],
-        'score1': scores[0],
-        'team2': teams[1],
-        'score2': scores[1]
-    }
+    if len(teams) == 2:
+        return {'team1': teams[0], 'score1': scores[0], 'team2': teams[1], 'score2': scores[1]}
+    return None
 
 def scrape_tournament_matches(url):
-    """
-    Récupère tous les matchs d'un tournoi
-    :param url: URL de la page Liquipedia du tournoi
-    :return: Liste des matchs avec leurs informations
-    """
-    response = requests.get(url)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    
-    matches_html = soup.find_all('div', class_='brkts-match')
-    
-    matches_info = []
-    for match in matches_html:
-        match_info = get_match_info(match)
-        if match_info:
-            matches_info.append(match_info)
-    
-    return matches_info
+    resp = requests.get(url)
+    soup = BeautifulSoup(resp.text, 'html.parser')
+    return [m for m in (get_match_info(m) for m in soup.find_all('div', class_='brkts-match')) if m]
 
 def main():
-    from pymongo import MongoClient
-    tournament_urls = [
-        "https://liquipedia.net/leagueoflegends/LEC/2023/Winter/Playoffs",
-        "https://liquipedia.net/leagueoflegends/LEC/2023/Spring/Playoffs",
-        "https://liquipedia.net/leagueoflegends/LEC/2023/Summer/Playoffs",
-        "https://liquipedia.net/leagueoflegends/LEC/2024/Winter/Playoffs",
-        "https://liquipedia.net/leagueoflegends/LEC/2024/Spring/Playoffs",
-        "https://liquipedia.net/leagueoflegends/LEC/2024/Summer/Playoffs",
-        "https://liquipedia.net/leagueoflegends/LEC/2025/Winter/Playoffs",
-        "https://liquipedia.net/leagueoflegends/LEC/2025/Spring/Playoffs"
-    ]
-
-    collection = get_mongo_collection("matchs") 
-    
+    collection = get_mongo_collection("matchs")
     if collection is None:
-        print("Erreur : collection MongoDB introuvable.")
+        print("❌ Erreur : collection MongoDB introuvable.")
         return
 
     collection.delete_many({})
-    print("Anciennes données supprimées de la collection 'matchs'.\n")
+    print("🗑 Anciennes données supprimées de la collection 'matchs'.\n")
 
-    for url in tournament_urls:
-        parts = url.split('/')
-        year = parts[4]
-        season = parts[5]
-        tournament_name = f"LEC {season} {year}"
-        
-        print(f"Processing: {tournament_name}")
-        
+    total = 0
+
+    # 🏆 Génère toutes les URLs LEC Playoffs + MSI + Worlds
+    urls = []
+
+    for year in range(2020, 2026):
+        for season in ["Winter", "Spring", "Summer"]:
+            urls.append((f"https://liquipedia.net/leagueoflegends/LEC/{year}/{season}/Playoffs", f"LEC {season} {year}"))
+
+        urls.append((f"https://liquipedia.net/leagueoflegends/Mid-Season_Invitational/{year}", f"MSI {year}"))
+        urls.append((f"https://liquipedia.net/leagueoflegends/World_Championship/{year}", f"Worlds {year}"))
+
+    # 🔍 Scraping
+    for url, tournament_name in urls:
+        print(f"🔍 Traitement : {tournament_name}")
         matches = scrape_tournament_matches(url)
 
         if not matches:
-            print("Aucun match trouvé pour ce tournoi.")
+            print("⚠️ Aucun match trouvé pour ce tournoi.\n")
             continue
-        
-        for match in matches:
-            match['tournament'] = tournament_name
+
+        for m in matches:
+            m['tournament'] = tournament_name
 
         collection.insert_many(matches)
-        print(f"{len(matches)} match(s) inséré(s) dans MongoDB.\n")
+        print(f"✅ {len(matches)} match(s) inséré(s).\n")
+        total += len(matches)
 
-
-if __name__ == "__main__":
-    main()
+    print(f"📊 Total : {total} match(s) extraits depuis 2020.")

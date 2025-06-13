@@ -10,21 +10,15 @@
     <table border="1">
         <tr>
             <th>Équipe</th>
-            <th>Nombre de joueurs</th>
             <th>Pays représentés</th>
-            <th>Longueur moyenne des pseudos</th>
         </tr>
         <tr>
             <td>{{ team1 }}</td>
-            <td>{{ stats1.total_players }}</td>
             <td>{{ stats1.countries | join(", ") }}</td>
-            <td>{{ stats1.avg_name_length }}</td>
         </tr>
         <tr>
             <td>{{ team2 }}</td>
-            <td>{{ stats2.total_players }}</td>
             <td>{{ stats2.countries | join(", ") }}</td>
-            <td>{{ stats2.avg_name_length }}</td>
         </tr>
     </table>
 
@@ -55,6 +49,29 @@
             <td>{{ info2.created or 'Inconnue' }}</td>
         </tr>
     </table>
+
+    {% if matchups %}
+        <h2>Matchs entre {{ team1.replace("_", " ") }} et {{ team2.replace("_", " ") }}</h2>
+        <table border="1">
+            <tr>
+                <th>Tournoi</th>
+                <th>{{ team1 }}</th>
+                <th>Score</th>
+                <th>{{ team2 }}</th>
+            </tr>
+            {% for match in matchups %}
+            <tr>
+                <td>{{ match.tournament }}</td>
+                <td>{{ match.team1 }}</td>
+                <td>{{ match.score1 }} - {{ match.score2 }}</td>
+                <td>{{ match.team2 }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <h2>Aucun match trouvé entre ces deux équipes dans les tournois LEC.</h2>
+    {% endif %}
+
 
     <a href="/">← Retour à l'accueil</a>
 </body>

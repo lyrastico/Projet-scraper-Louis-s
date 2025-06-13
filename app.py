@@ -10,8 +10,8 @@ def home():
 @app.route('/team', methods=['GET'])
 def team():
     name = request.args.get('name')
-    players, stats = get_team_info(name)
-    return render_template('team.html', team=name, players=players, stats=stats)
+    players, stats, info = get_team_info(name)  # 🔁 Mise à jour ici
+    return render_template('team.html', team=name, players=players, stats=stats, info=info)  # ✅ Ajout de info
 
 if __name__ == '__main__':
     app.run(debug=True)

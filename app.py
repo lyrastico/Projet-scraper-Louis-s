@@ -28,7 +28,6 @@ def compare():
     players1, stats1, info1 = get_team_info(team1)
     players2, stats2, info2 = get_team_info(team2)
 
-    # 🔍 Recherche des matchs entre team1 et team2
     collection = get_mongo_collection("matchs")
     matchups = list(collection.find({
         "$or": [
